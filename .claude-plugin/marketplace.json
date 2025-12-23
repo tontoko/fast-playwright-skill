@@ -9,7 +9,7 @@
     {
       "name": "fast-playwright",
       "version": "1.0.0",
-      "source": ".",
+      "source": "./",
       "description": "Fast, persistent, and token-optimized browser automation using Playwright"
     }
   ]
