@@ -2,7 +2,10 @@
   "name": "fast-playwright",
   "version": "1.0.0",
   "description": "Fast, persistent, and token-optimized browser automation using Playwright. Supports multi-agent session isolation, navigation, clicking, typing, screenshots, batch execution, and more.",
-  "author": "tontoko",
+  "author": {
+    "name": "tontoko",
+    "url": "https://github.com/tontoko"
+  },
   "license": "MIT",
   "repository": "https://github.com/tontoko/fast-playwright-skill",
   "keywords": [
@@ -14,6 +17,6 @@
     "testing"
   ],
   "skills": [
-    "SKILL.md"
+    "./SKILL.md"
   ]
 }
