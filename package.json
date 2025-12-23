@@ -16,6 +16,9 @@
     "browser-automation",
     "web-scraping"
   ],
+  "scripts": {
+    "postinstall": "npx playwright install chromium"
+  },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.0.0",
     "@tontoko/fast-playwright-mcp": "^0.1.2",

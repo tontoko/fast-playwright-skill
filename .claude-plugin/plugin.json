@@ -14,7 +14,11 @@
     "automation",
     "web",
     "scraping",
-    "testing"
+    "agent-skills",
+    "claude-code",
+    "cursor",
+    "codex",
+    "goose"
   ],
   "skills": [
     "./SKILL.md"

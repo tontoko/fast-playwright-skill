@@ -1,6 +1,8 @@
 # Fast Playwright Skill
 
-A Claude Code skill for fast, persistent, and token-optimized browser automation using Playwright.
+A cross-platform Agent Skill for fast, persistent, and token-optimized browser automation using Playwright.
+
+Compatible with [Agent Skills](https://agentskills.io) specification - works with Claude Code, Cursor, Codex CLI, Goose, and other supported agents.
 
 ## Features
 
@@ -12,25 +14,53 @@ A Claude Code skill for fast, persistent, and token-optimized browser automation
 
 ## Installation
 
-### As a Claude Code Plugin
+### Claude Code (Plugin)
 
 ```bash
-# Add the marketplace
-/plugin marketplace add tontoko/fast-playwright-skill
+# Add marketplace and install
+claude plugin marketplace add tontoko/fast-playwright-skill
+claude plugin install fast-playwright@fast-playwright-skill
 
-# Install the plugin
-/plugin install fast-playwright@fast-playwright-skill
+# Install dependencies (auto-runs via postinstall, or manually)
+cd ~/.claude/plugins/cache/fast-playwright-skill/fast-playwright/1.0.0
+npm install
 ```
 
-### Manual Installation
+### Claude Code (Manual)
 
 ```bash
-# Clone the repository
 git clone https://github.com/tontoko/fast-playwright-skill.git ~/.claude/skills/fast-playwright
+cd ~/.claude/skills/fast-playwright && npm install
+```
 
-# Install dependencies
-cd ~/.claude/skills/fast-playwright
-node scripts/install.js
+### Cursor
+
+```bash
+git clone https://github.com/tontoko/fast-playwright-skill.git ~/.cursor/skills/fast-playwright
+cd ~/.cursor/skills/fast-playwright && npm install
+```
+
+### Codex CLI (OpenAI)
+
+```bash
+git clone https://github.com/tontoko/fast-playwright-skill.git ~/.codex/skills/fast-playwright
+cd ~/.codex/skills/fast-playwright && npm install
+```
+
+### Goose
+
+```bash
+git clone https://github.com/tontoko/fast-playwright-skill.git ~/.goose/skills/fast-playwright
+cd ~/.goose/skills/fast-playwright && npm install
+```
+
+### Other Agents
+
+For any agent supporting [Agent Skills](https://agentskills.io):
+
+```bash
+git clone https://github.com/tontoko/fast-playwright-skill.git <agent-skills-directory>/fast-playwright
+cd <agent-skills-directory>/fast-playwright && npm install
 ```
 
 ## Usage
@@ -92,6 +122,11 @@ Agent B ──┤  X-Session-Id: agent-b       ├─► BrowserContext B
 ## Available Tools
 
 See [SKILL.md](SKILL.md) for the complete tools reference.
+
+## Related
+
+- [fast-playwright-mcp](https://github.com/tontoko/fast-playwright-mcp) - The underlying MCP server
+- [Agent Skills Specification](https://agentskills.io/specification) - The open standard
 
 ## License
 
