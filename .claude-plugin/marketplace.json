@@ -1,0 +1,16 @@
+{
+  "name": "fast-playwright-skill",
+  "description": "Token-optimized Playwright browser automation for Claude Code",
+  "owner": {
+    "name": "tontoko",
+    "url": "https://github.com/tontoko"
+  },
+  "plugins": [
+    {
+      "name": "fast-playwright",
+      "version": "1.0.0",
+      "source": ".",
+      "description": "Fast, persistent, and token-optimized browser automation using Playwright"
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+# Dependencies
+node_modules/
+
+# Runtime files
+.server.lock
+.browser-data/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Test artifacts
+test-results/
+playwright-report/
+screenshots/
