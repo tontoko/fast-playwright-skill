@@ -67,10 +67,17 @@ Docs: https://github.com/tontoko/fast-playwright-mcp — especially `docs/migrat
 
 ## CLI fallback (no MCP)
 
-Resolve paths from this skill directory; the caller's cwd does not contain `scripts/`.
+`scripts/client.js` sits next to `SKILL.md`. A flattened skill dir has `scripts/` at the top; a clone of this plugin repo has them under `skills/fast-playwright/`. Resolve that before calling node — the caller's cwd does not contain `scripts/`.
 
 ```bash
-FAST_PLAYWRIGHT_DIR="${FAST_PLAYWRIGHT_DIR:-$HOME/.agents/skills/fast-playwright}"
+_fp_root="${FAST_PLAYWRIGHT_DIR:-$HOME/.agents/skills/fast-playwright}"
+if [ -f "$_fp_root/skills/fast-playwright/scripts/client.js" ]; then
+  FAST_PLAYWRIGHT_DIR="$_fp_root/skills/fast-playwright"
+elif [ -f "$_fp_root/scripts/client.js" ]; then
+  FAST_PLAYWRIGHT_DIR="$_fp_root"
+else
+  FAST_PLAYWRIGHT_DIR="$_fp_root"
+fi
 node "$FAST_PLAYWRIGHT_DIR/scripts/install.js"   # once
 node "$FAST_PLAYWRIGHT_DIR/scripts/client.js" <tool_name> '<json_args>'
 ```

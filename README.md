@@ -52,16 +52,22 @@ npm install
 
 ### Manual (Claude / Cursor / Codex / Goose / Grok)
 
+This repository is a plugin wrapper. Flatten `skills/fast-playwright/` plus the root `package.json` into the agent skill dir so `scripts/client.js` is at the top of that directory:
+
 ```bash
-git clone https://github.com/tontoko/fast-playwright-skill.git ~/.agents/skills/fast-playwright
-cd ~/.agents/skills/fast-playwright && npm install
+git clone https://github.com/tontoko/fast-playwright-skill.git /tmp/fast-playwright-skill
+DEST="${HOME}/.agents/skills/fast-playwright"
+mkdir -p "$DEST"
+cp -a /tmp/fast-playwright-skill/skills/fast-playwright/. "$DEST/"
+cp /tmp/fast-playwright-skill/package.json /tmp/fast-playwright-skill/package-lock.json "$DEST/"
+cd "$DEST" && npm install
 ```
 
-Copy or symlink `skills/fast-playwright` into the agent's skills directory if the clone layout is the plugin repo (this repository). Flattened installs use the `skills/fast-playwright/` contents plus this root `package.json`.
+Use the same flatten for `~/.claude/skills/fast-playwright`, `~/.cursor/skills/fast-playwright`, `~/.codex/skills/fast-playwright`, or `~/.goose/skills/fast-playwright`. If you clone the repo as-is instead, the skill's fallback looks for `skills/fast-playwright/scripts/client.js`.
 
 ## CLI fallback
 
-From the skill directory (after `npm install`):
+From the flattened skill directory (after `npm install`), where `scripts/client.js` exists:
 
 ```bash
 node scripts/client.js browser_navigate '{"url": "https://example.com"}'
