@@ -1,7 +1,7 @@
 {
   "name": "fast-playwright-skill",
-  "version": "1.0.0",
-  "description": "Fast, persistent, and token-optimized browser automation skill for Claude Code",
+  "version": "1.1.0",
+  "description": "Agent skill for @tontoko/fast-playwright-mcp 0.2+ (MCP first, CLI fallback)",
   "type": "module",
   "author": "tontoko",
   "license": "MIT",
@@ -21,7 +21,7 @@
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.0.0",
-    "@tontoko/fast-playwright-mcp": "^0.1.2",
+    "@tontoko/fast-playwright-mcp": "^0.2.0",
     "express": "^4.18.2"
   }
 }

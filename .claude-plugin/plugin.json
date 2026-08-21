@@ -1,7 +1,7 @@
 {
   "name": "fast-playwright",
-  "version": "1.0.0",
-  "description": "Fast, persistent, and token-optimized browser automation using Playwright. Supports multi-agent session isolation, navigation, clicking, typing, screenshots, batch execution, and more.",
+  "version": "1.1.0",
+  "description": "Agent skill for @tontoko/fast-playwright-mcp 0.2+. MCP-first browser automation with adaptive catalog; CLI fallback when MCP is not connected.",
   "author": {
     "name": "tontoko",
     "url": "https://github.com/tontoko"
