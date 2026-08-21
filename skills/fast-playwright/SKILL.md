@@ -1,72 +1,103 @@
 ---
 name: fast-playwright
-description: Fast, persistent, and token-optimized browser automation using Playwright. Supports navigation, clicking, typing, screenshots, batch execution, and more. Use when working with web pages, browser automation, or when the user mentions browsing, clicking, or web scraping.
+description: Fast, persistent, token-optimized browser automation via @tontoko/fast-playwright-mcp. Use when working with web pages, browser automation, clicking, typing, screenshots, or web scraping. Prefer this MCP over Microsoft @playwright/mcp and over desktop pixel clicks.
 ---
 
 # Fast Playwright
 
-This skill provides a persistent, headless browser environment optimized for LLM agents.
-It keeps the browser open between calls to enable fast interactions.
+Use **`@tontoko/fast-playwright-mcp` 0.2+**. This is the tontoko fork, not Microsoft `@playwright/mcp`.
 
-## Setup
+Prefer native MCP tools. Fall back to this skill's `scripts/client.js` only when the MCP server is not connected.
 
-Run the installation script once to set up dependencies and download browsers:
-```bash
-node scripts/install.js
-```
+## MCP first (0.2)
 
-## Usage
-
-All tools are executed via `client.js`. Arguments must be valid JSON.
+Install the server in the agent:
 
 ```bash
-node scripts/client.js <tool_name> '<json_args>'
+# Claude Code
+claude mcp add playwright -- npx -y @tontoko/fast-playwright-mcp@latest
+
+# Grok
+grok mcp add playwright -- npx -y @tontoko/fast-playwright-mcp@latest
 ```
 
-### Options
+Standard MCP config:
+
+```json
+{
+  "mcpServers": {
+    "playwright": {
+      "command": "npx",
+      "args": ["-y", "@tontoko/fast-playwright-mcp@latest"]
+    }
+  }
+}
+```
+
+Do not install Microsoft `@playwright/mcp` alongside this server. The tool names collide.
+
+### Adaptive catalog
+
+0.2 starts with seven tools:
+
+| Tool | Role |
+|------|------|
+| `browser_tools` | Search, enable, disable, reset the catalog |
+| `browser_query` | Dispatch read-only tools |
+| `browser_execute` | Dispatch action / destructive tools |
+| `browser_batch_execute` | Multi-step actions |
+| `browser_navigate` | Open a URL |
+| `browser_snapshot` | Accessibility snapshot |
+| `browser_find` | Find elements |
+
+Hidden registered tools stay directly callable by name. To surface one in the catalog: `browser_tools` with `action: "search"`, then enable it, or dispatch through `browser_query` / `browser_execute`.
+
+`--tool-profile=full` restores the complete static catalog. `--tool-profile=minimal` leaves only the three gateways.
+
+### How to call
+
+1. Discover with the agent's MCP search (`search_tool` on Grok; the MCP tool list on Claude/Cursor).
+2. Call `playwright__<tool>` (Grok) or `mcp__playwright__<tool>` (Claude) or the server's native name.
+3. After navigate/click/type, snapshot (or a screenshot) before the next action.
+4. Use `expectation` to cut tokens (`includeSnapshot: false`, `diffOptions.enabled: true`).
+
+Do not drive a web page with desktop pixel clicks when this MCP is available.
+
+Docs: https://github.com/tontoko/fast-playwright-mcp — especially `docs/migration-0.2.md`.
+
+## CLI fallback (no MCP)
+
+`scripts/client.js` sits next to `SKILL.md`. A flattened skill dir has `scripts/` at the top; a clone of this plugin repo has them under `skills/fast-playwright/`. Resolve that before calling node — the caller's cwd does not contain `scripts/`.
+
+```bash
+_fp_root="${FAST_PLAYWRIGHT_DIR:-$HOME/.agents/skills/fast-playwright}"
+if [ -f "$_fp_root/skills/fast-playwright/scripts/client.js" ]; then
+  FAST_PLAYWRIGHT_DIR="$_fp_root/skills/fast-playwright"
+elif [ -f "$_fp_root/scripts/client.js" ]; then
+  FAST_PLAYWRIGHT_DIR="$_fp_root"
+else
+  FAST_PLAYWRIGHT_DIR="$_fp_root"
+fi
+node "$FAST_PLAYWRIGHT_DIR/scripts/install.js"   # once
+node "$FAST_PLAYWRIGHT_DIR/scripts/client.js" <tool_name> '<json_args>'
+```
 
 | Option | Description |
 |--------|-------------|
-| `--session <id>` | Use isolated browser session (for multi-agent) |
-| `--headed` | Show browser window (default: headless) |
-| `--sessions` | List active sessions |
-| `--stop` | Stop the server |
+| `--session <id>` | Isolated browser context |
+| `--headed` | Visible browser (restart server to switch) |
+| `--sessions` | List sessions |
+| `--stop` | Stop the skill HTTP wrapper |
 
-### Multi-Agent Session Isolation
-
-Each session gets its own isolated browser context (cookies, storage, page state):
+Sessions expire after 15 minutes idle. Restart after `--headed` / headless switch: `node scripts/client.js --stop`.
 
 ```bash
-# Agent A uses session "agent-a"
 node scripts/client.js --session agent-a browser_navigate '{"url": "https://site-a.com"}'
-
-# Agent B uses session "agent-b" (completely isolated)
-node scripts/client.js --session agent-b browser_navigate '{"url": "https://site-b.com"}'
-
-# List active sessions
-node scripts/client.js --sessions
-
-# Without --session, uses shared "default" session
-node scripts/client.js browser_navigate '{"url": "https://example.com"}'
-```
-
-Sessions auto-expire after 15 minutes of inactivity.
-
-### Headed Mode (Visible Browser)
-
-Add `--headed` to see the browser window:
-```bash
 node scripts/client.js --headed browser_navigate '{"url": "https://example.com"}'
 ```
 
-Note: The server must be restarted to switch between headed/headless modes:
-```bash
-node scripts/client.js --stop
-```
+## Token optimization
 
-## Token Optimization
-
-Most tools accept an `expectation` object to control output size:
 ```json
 {
   "expectation": {
@@ -76,210 +107,78 @@ Most tools accept an `expectation` object to control output size:
 }
 ```
 
-## Tools Reference
+## CLI tool names
+
+Same names as the MCP tools. Hidden 0.2 tools remain callable by these names through `client.js`.
 
 ### Navigation
-
-#### `browser_navigate`
-Navigate to a URL.
 ```bash
 node scripts/client.js browser_navigate '{"url": "https://example.com"}'
-```
-
-#### `browser_navigate_back`
-Go back to previous page.
-```bash
 node scripts/client.js browser_navigate_back '{}'
-```
-
-#### `browser_navigate_forward`
-Go forward to next page.
-```bash
 node scripts/client.js browser_navigate_forward '{}'
 ```
 
 ### Interaction
-
-#### `browser_click`
-Click an element. Supports CSS, text, role selectors.
 ```bash
 node scripts/client.js browser_click '{"selectors": [{"css": "button.submit"}]}'
-```
-
-#### `browser_type`
-Type text into an element.
-```bash
 node scripts/client.js browser_type '{"selectors": [{"css": "#search"}], "text": "query"}'
-```
-
-#### `browser_press_key`
-Press a keyboard key.
-```bash
 node scripts/client.js browser_press_key '{"key": "Enter"}'
-```
-
-#### `browser_hover`
-Hover over an element.
-```bash
 node scripts/client.js browser_hover '{"selectors": [{"css": ".menu-item"}]}'
-```
-
-#### `browser_drag`
-Drag and drop between elements.
-```bash
 node scripts/client.js browser_drag '{"startSelectors": [{"css": "#source"}], "endSelectors": [{"css": "#target"}]}'
-```
-
-#### `browser_select_option`
-Select option in dropdown.
-```bash
 node scripts/client.js browser_select_option '{"selectors": [{"css": "select#country"}], "values": ["US"]}'
-```
-
-#### `browser_file_upload`
-Upload files to file input.
-```bash
 node scripts/client.js browser_file_upload '{"paths": ["/path/to/file.pdf"]}'
-```
-
-#### `browser_handle_dialog`
-Handle alert/confirm/prompt dialogs.
-```bash
 node scripts/client.js browser_handle_dialog '{"accept": true}'
 ```
 
-### Page State
-
-#### `browser_snapshot`
-Get accessibility snapshot of current page.
+### Page state
 ```bash
 node scripts/client.js browser_snapshot '{}'
-```
-
-#### `browser_take_screenshot`
-Take a screenshot.
-```bash
 node scripts/client.js browser_take_screenshot '{"filename": "page.png"}'
-```
-
-#### `browser_evaluate`
-Evaluate JavaScript on page.
-```bash
 node scripts/client.js browser_evaluate '{"function": "() => document.title"}'
-```
-
-#### `browser_console_messages`
-Get console messages.
-```bash
 node scripts/client.js browser_console_messages '{}'
-```
-
-#### `browser_network_requests`
-Get network requests.
-```bash
 node scripts/client.js browser_network_requests '{}'
 ```
 
-### Element Discovery
-
-#### `browser_find_elements`
-Find elements by text, role, tag, or attributes.
+### Discovery
 ```bash
 node scripts/client.js browser_find_elements '{"searchCriteria": {"text": "Submit"}}'
-```
-
-#### `browser_inspect_html`
-Extract and analyze HTML content.
-```bash
 node scripts/client.js browser_inspect_html '{"selectors": [{"css": "main"}]}'
 ```
 
-### Tab Management
-
-#### `browser_tab_list`
-List all open tabs.
+### Tabs and browser
 ```bash
 node scripts/client.js browser_tab_list '{}'
-```
-
-#### `browser_tab_new`
-Open a new tab.
-```bash
 node scripts/client.js browser_tab_new '{"url": "https://example.com"}'
-```
-
-#### `browser_tab_select`
-Select a tab by index.
-```bash
 node scripts/client.js browser_tab_select '{"index": 0}'
-```
-
-#### `browser_tab_close`
-Close a tab.
-```bash
 node scripts/client.js browser_tab_close '{}'
-```
-
-### Browser Control
-
-#### `browser_resize`
-Resize browser window.
-```bash
 node scripts/client.js browser_resize '{"width": 1920, "height": 1080}'
-```
-
-#### `browser_close`
-Close the browser.
-```bash
 node scripts/client.js browser_close '{}'
-```
-
-#### `browser_install`
-Install the configured browser.
-```bash
 node scripts/client.js browser_install '{}'
 ```
 
-### Utilities
-
-#### `browser_wait_for`
-Wait for text to appear/disappear or time to pass.
+### Wait, diagnose, batch
 ```bash
 node scripts/client.js browser_wait_for '{"text": "Loading complete"}'
 node scripts/client.js browser_wait_for '{"textGone": "Loading..."}'
 node scripts/client.js browser_wait_for '{"time": 2}'
-```
-
-#### `browser_diagnose`
-Analyze page complexity and performance.
-```bash
 node scripts/client.js browser_diagnose '{}'
-```
-
-### Batch Execution
-
-#### `browser_batch_execute`
-Execute multiple steps in sequence. Highly recommended for forms.
-```bash
 node scripts/client.js browser_batch_execute '{
   "steps": [
     {"tool": "browser_type", "arguments": {"selectors": [{"css": "#user"}], "text": "me"}},
-    {"tool": "browser_type", "arguments": {"selectors": [{"css": "#pass"}], "text": "123"}},
     {"tool": "browser_click", "arguments": {"selectors": [{"css": "#login"}]}}
   ]
 }'
 ```
 
-## Selector Types
+## Selectors
 
-All interaction tools support multiple selector strategies:
+- CSS: `{"css": "#id"}`
+- Role: `{"role": "button", "text": "Submit"}`
+- Text: `{"text": "Click me"}`
+- Ref: `{"ref": "e3"}` from a previous snapshot
 
-- **CSS**: `{"css": "#id"}`, `{"css": ".class"}`, `{"css": "button[type=submit]"}`
-- **Role**: `{"role": "button"}`, `{"role": "textbox", "text": "Search"}`
-- **Text**: `{"text": "Click me"}`
-- **Ref**: `{"ref": "e3"}` (from previous snapshot)
+Fallbacks:
 
-Multiple selectors act as fallbacks:
 ```json
 {"selectors": [{"css": "#submit"}, {"role": "button", "text": "Submit"}]}
 ```
